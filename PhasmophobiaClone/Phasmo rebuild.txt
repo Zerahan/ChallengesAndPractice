@@ -1,0 +1,143 @@
+√
+
+Player
+√	3 inventory slots
+√		G to drop
+		F to place/use
+√	sanity level
+√	sanity level drops while further than 400 units from all active light sources, includes a trace check for blocking walls.
+		Should probably replace with a simple "is any lightswitch for this room powered on" check.
+√	Rooms
+
+√	Circuit breaker
+√	Circuitbreaker can turn on/off
+√	Circuitbreaker Informs director of it's state when it is changed
+√	If there are multiple circuit breakers for a map, the director randomly picks one and deletes the rest.
+√	Director updates all lights when Circuitbreaker changes state
+√	Lightswitches
+√	Lightswitch can turn on/off
+√	Lightswitch controls visibility of multiple lights
+√	Lights flicker when director says a hunt is happening
+√	Doors exist
+√	Doors swing by holding Use on them and moving
+√	Doors can be "closed"
+
+Equipment:
+√	Flashlight
+√		Flickers if ghost is in hunt mode
+√	Thermometer
+√		Every 1 second, does trace forward. If it hits, does a sphere trace on that point that can hit rooms. Displays that room's temperature with a margin of error of +-2.
+√	Ghost writing
+√		If the director says the ghost responds to this: If collids with the ghost *or* the ghost's room, has a chance of being written in.
+√	EMF Reader
+√		Collides with EMF event spheres.
+√	Video Camera
+√		Has two modes: normal and night-vision. Night-Vision mode can see ghost orbs
+√		Maybe uses post-processing and a render material?
+√	UV Light
+√		Illuminates fingerprints
+	Spirit Box
+		voice recognition?
+
+Director
+√	Picks a random room to spawn the ghost in
+√	Picks a random type for the ghost to be
+√		Type determines what evidence gets a feedback
+	If SpiritBox is evidence:
+		Selects a random 5 questions from each category that can be responded to.
+	ActiveLevel:
+		Slowly increases over time. Also increases when around player or from player-caused events. Used to determine things like EMF 5, ghost writing, spirit box, etc.
+√	IsHuntActive:
+		Determines behavior of hunt timer.
+	HuntTimer:
+		When a hunt will end or when a hunt will start
+		If hunt ends, sets timer to Time + HuntCooldown
+		If hunt starts, sets timer to Time + HuntDuration
+	HuntCooldown:
+		30 seconds +-10. Demon Defaults to 15 +-5
+	TargetPlayer:
+		Defaults to random selection on hunt start. Banshee only changes this when the target is dead.
+
+√GhostType
+√	DisplayName
+√	Evidence: Enum flags
+	HuntCooldown
+		Defaults to 30, Demon sets to 15
+	HuntCooldownMargin
+		Defaults to (-10,10), Demon sets to (-5,5)
+	HuntDuration
+		Defaults to 30
+	HuntCooldownMargin
+		Defaults to (0,20)
+	HuntTargeting
+		Defaults to ClosestFirst + ChangeOnHunt + ChangeOnDeath. Banshee turns off ChangeOnHunt
+√	Temperature
+√		Defaults to 5C, Banshee/Demon/Mare/Phantom/Wraith/Yurei sets to -10C
+	LightBehavior
+		Defaults to Uncaring. Mare sets to PreferOff. Jin sets to PreferOn.
+		Used to determine what happens when a CircuitBreaker event is triggered.
+	WalkSpeed (only used during hunt)
+		Revenant defaults to faster
+	WalkSpeedBehavior (only used during hunt)
+		Defaults to Unchanged, Jinn sets to FurtherFaster
+√	EventChance:
+√		DoorEvent - Fingerprints makes this more likely
+√		LightSwitchEvent - Fingerprints makes this more likely. Outcome determined by LightBehavior
+√		WindowEvent - Fingerprints makes this more likely
+√		PhysicsEvent - Phantom makes this more likely
+√		CircuitBreakerEvent - Mare makes this more likely
+√		GhostSpawnEvent - Mare/Yurei makes this more likely. A smudged Yurei can only pick spawn room as target for wandering.
+
+Evidence
+√	EMF Event:
+√		A sphere collider with an EMF level of 2-5. Spawns on moved doors, thrown objects, and by the ghost.
+√	Temperature:
+√		The room the ghost is in drops in temperature over time. Temperature rises to default if ghost is not present.
+√	Ghost Orbs:
+√		Particle System that is only visible to a camera that is in night-vision mode.
+√	Ghost Writing:
+√		Ghost behavior event that sets a book's "IsWrittenIn" flag if it's in the right room.
+√	Fingerprints:
+√		When a door, window, or light switch is interacted with by the right type of ghost, enables that object's "HasFingerprint" flag.
+√		Only visible in UV light. If the flashlight drops a decal where it hits, can use that to overlap with the fingerprint decal for visibility?
+	Spirit Box:
+		If the ghost is in range, it can respond to a list of questions from voice recognition.
+
+Ghost Event:
+√	Door:
+		If closed, is opened by an inch for 5 seconds, then slammed shut.
+		If open, gets pushed slightly in a random direction.
+√		Spawns emf 3 event.
+√	Light Switch:
+√		Spawns emf 2 event.
+	Window:
+		Makes sound.
+		Spawns emf 2 event.
+	Physics Object:
+		Pushed in random direction (not up/down)
+√		Spawns emf 3 event.
+√	CircuitBreaker
+√		Low chance
+√		Toggles between on/off
+		Mare ignores if turned off
+		
+√	Ghost Spawn:
+		Maybe handles hunts?
+√		Spawns EMF 4 event (or 5 if ghost type and activity level is right)
+		If ghost invisible, picks a random room to travel to.
+		If ghost visible, randomly picks staying put or moving to closest player (aka fake hunt)
+
+Ghost
+	Every time the hunt timer expires, it picks a player and attempts to attack
+		If sanity is above 50, the hunt is exclusively a sanity drop on catching
+		If sanity is below 50, hunt has an increasingly likely chance to be a lethal hunt or not happen at all
+	Spawns in and walks to random room
+	Cools off the room it's currently in
+
+Map
+√	Room
+√		Temperature
+√			Defaults to 15C
+√			If a ghost is present, temperature rapidly drops to ghost's temperature
+		IsLit
+√		IsGhostRoom
